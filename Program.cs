@@ -1,15 +1,21 @@
 ﻿
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.VisualBasic;
 using System.Runtime.CompilerServices;
 
 namespace Systemzarzadzania
 {
     internal class Program
     {
-        static List<Product> magazyn = new List<Product>();
+        
         static void Main(string[] args)
         {
-            magazyn.Add(new Product("001", "Produkt 1", 10, 19.99m));
-            magazyn.Add(new Product("002", "Produkt 2", 5, 9.99m));
+            using (var db = new AppDbContext())
+            {
+                db.Database.EnsureCreated();
+            }
+
+            
 
             while (true)
             {
@@ -48,29 +54,45 @@ namespace Systemzarzadzania
         }
         static void DisplayProducts()
         {
+          using var db  = new AppDbContext();
             Console.WriteLine("Produkty w magazynie:");
-            foreach (var product in magazyn)
+            var produkty = db.Products.ToList();
+            if(produkty.Count() == 0)
             {
-                Console.WriteLine($"ID: {product.ID}, Nazwa: {product.NAME}, Ilość: {product.ilosc}, Cena: {product.cena}");
+                Console.WriteLine("Magazyn jest pusty");
+            }
+            foreach (var produkt in produkty)
+            {
+                Console.WriteLine($"ID: {produkt.Id}, Nazwa: {produkt.Name}, Ilość: {produkt.ilosc}, Cena: {produkt.cena}");
             }
         } 
         static void AddProduct()
         {
-            string id = VerifyString("Podaj ID produktu:");       
+                  
             string name = VerifyString("Podaj nazwę produktu:");
             uint ilosc = Verify<uint>("Podaj ilość produktu:");
             decimal cena = Verify<decimal>("Podaj cenę produktu:");
-            magazyn.Add(new Product(id, name, ilosc, cena));
+            using var db = new AppDbContext();
+            
+            var nowyProdukt = new Product(name,ilosc, cena);
+
+
+            db.Products.Add(nowyProdukt);
+            db.SaveChanges();
+            Console.WriteLine("Produkt zostal dodany");
         }
         static void RemoveProduct()
         {
-            
-            string id = VerifyString("Podaj ID produktu do usunięcia:");
-            var product = magazyn.FirstOrDefault(p => p.ID == id);
+
+            int id = Verify<int>("Podaj Id produktu do usuniecia:");
+            using var db = new AppDbContext();
+            var product = db.Products.FirstOrDefault(p => p.Id == id);
+
             if (product != null)
             {
-                magazyn.Remove(product);
-                Console.WriteLine("Produkt został usunięty.");
+                db.Products.Remove(product);
+                db.SaveChanges();
+                Console.WriteLine("Produkt zostal pomyslnie usuniety");
             }
             else Console.WriteLine("Nie znaleziono produktu o podanym ID.");
             
@@ -78,14 +100,25 @@ namespace Systemzarzadzania
         static void ChangeProductQuantity()
         {
             Console.WriteLine("Podaj ID produktu, którego ilość chcesz zmienić:");
-            string id = VerifyString("Podaj ID produktu, którego ilość chcesz zmienić:");
-            var product = magazyn.FirstOrDefault(p => p.ID == id);
+            int id = Verify<int>("Podaj ID produktu, którego ilość chcesz zmienić:");
+
+
+            using var db = new AppDbContext();
+            var product = db.Products.FirstOrDefault(p => p.Id == id);
+
+
             if (product != null)
             {
-                Console.WriteLine("Podaj nową ilość produktu:");
+                //Console.WriteLine("Podaj nową ilość produktu:");
+                //uint newQuantity = Verify<uint>("Podaj nową ilość produktu:");
+                //product.ilosc = newQuantity;
+                //Console.WriteLine("Ilość produktu została zmieniona.");
+
                 uint newQuantity = Verify<uint>("Podaj nową ilość produktu:");
                 product.ilosc = newQuantity;
-                Console.WriteLine("Ilość produktu została zmieniona.");
+                db.SaveChanges();
+                Console.WriteLine("Ilosc produktu zostala zmieniona.");
+
             }
             else  Console.WriteLine("Nie znaleziono produktu o podanym ID.");
             
@@ -93,11 +126,12 @@ namespace Systemzarzadzania
        static void ChangeProductPrice()
         {
                    
-            string id = VerifyString("Podaj ID produktu, którego cenę chcesz zmienić:");
+            int id = Verify<int>("Podaj ID produktu, którego cenę chcesz zmienić:");
 
+            using var db  = new AppDbContext();
 
+            var product = db.Products.FirstOrDefault(p => p.Id == id);
 
-            var product = magazyn.FirstOrDefault(p => p.ID == id);
             if (product != null)
             {
                
@@ -110,6 +144,7 @@ namespace Systemzarzadzania
                 else
                 {
                     product.cena = newPrice;
+                    db.SaveChanges();
                     Console.WriteLine("Cena produktu została zmieniona.");
                 }
             }

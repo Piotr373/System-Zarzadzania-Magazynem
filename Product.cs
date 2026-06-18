@@ -7,40 +7,26 @@ namespace Systemzarzadzania
 {
     internal class Product
     {
-        private string id = null!;
-        private string name = null!;
+        public int Id { get; set;   }
+        public string Name { get; set; } = null!;
 
         public  uint ilosc { get; set; } 
         public decimal cena { get; set; }
 
-        public Product(string id, string name, uint ilosc, decimal cena)
+        public Product( string name, uint ilosc, decimal cena)
         {
-            this.ID = id;
-            this.NAME = name;
+            
+            this.Name = name;
             this.ilosc = ilosc;
             this.cena = cena;
         } 
-
-        public string ID
+        public Product()
         {
-            get { return this.id; } 
-            set
-            {  if(string.IsNullOrEmpty(value))
-                    throw new ArgumentNullException("ID nie moze byc puste.");
-            this.id = value;
-            } 
 
         }
-        public string NAME
-        {
-            get { return this.name; }
-            set
-            {
-                if (string.IsNullOrEmpty(value))
-                    throw new ArgumentNullException("Nazwa nie moze byc pusta.");
-                this.name = value;
-            }
 
+      
+   
 
 
 
@@ -48,4 +34,4 @@ namespace Systemzarzadzania
 
     }
 }
-}
+
